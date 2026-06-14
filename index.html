@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【完全自動】Codex解説動画生成プロジェクト構築マニュアル</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-color: #0f1115;
+            --glass-bg: rgba(23, 27, 33, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #10b981; /* Muted Emerald */
+            --accent-hover: #059669;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05), transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.05), transparent 30%);
+            line-height: 1.7;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+        }
+
+        pre {
+            background: #1e2229 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+            color: #a7f3d0;
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            margin-right: 0.75rem;
+        }
+
+        /* Syntax highlighting simple overrides */
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="p-4 md:p-10 flex justify-center">
+
+    <div class="max-w-4xl w-full">
+        <!-- Header -->
+        <header class="mb-12 text-center mt-8">
+            <span class="text-emerald-400 font-bold tracking-widest text-sm mb-2 block">PURCHASER EXCLUSIVE</span>
+            <h1 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Codexで解説動画を<br class="md:hidden">「完全自動生成」する仕組み</h1>
+            <p class="text-slate-400 max-w-2xl mx-auto">
+                これは単なる「プロンプト生成ツール」やない。Codexの「ComputerUse」スキルを駆使し、スライド作成から音声合成（AivisSpeech）、動画編集・レンダリング（Remotion）までを、あなたの代わりにPCを操作して全自動で終わらせる「動画制作AIエージェント」の構築マニュアルや。
+            </p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="space-y-8">
+            
+            <!-- Step 1 -->
+            <section class="glass-panel p-6 md:p-8">
+                <h2 class="text-2xl font-bold flex items-center mb-4">
+                    <span class="step-badge">1</span>
+                    動画専用の作業フォルダを作る
+                </h2>
+                <p class="mb-4 text-slate-300">
+                    note記事を書く `Project_Note` とは別に、動画編集専用のフォルダを作った方がツール同士が干渉せずに安全や。<br>
+                    ターミナル（黒い画面）を開いて、以下のコマンドを実行してな。
+                </p>
+                <div class="relative group">
+                    <pre class="p-4"><code class="text-sm">mkdir -p "$HOME/Developer/Project_Video"
+cd "$HOME/Developer/Project_Video"</code></pre>
+                </div>
+            </section>
+
+            <!-- Step 2 -->
+            <section class="glass-panel p-6 md:p-8">
+                <h2 class="text-2xl font-bold flex items-center mb-4">
+                    <span class="step-badge">2</span>
+                    「動画ディレクターAI」を宿す AGENTS.md の作成
+                </h2>
+                <p class="mb-4 text-slate-300">
+                    Codexに「動画を作って」と頼むだけでは、ただのテキストしか返ってこない。<br>
+                    ComputerUseスキルと各種ツールを連携させるための強力なルールファイル <code>AGENTS.md</code> を作成する。<br>
+                    以下の内容をコピーして、先ほど作った <code>Project_Video</code> フォルダに <code>AGENTS.md</code> という名前で保存してな。
+                </p>
+                <div class="relative mt-4">
+                    <button class="copy-btn absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded text-white z-10" onclick="copyCode(this, 'agent-code')">コピー</button>
+                    <pre class="p-4 pt-12 max-h-96 overflow-y-auto" id="agent-code"><code># 動画制作プロジェクト 自動化エージェント設定
+
+あなたは優秀な「動画ディレクター兼エディター」です。
+ユーザーから「テーマ」が与えられたら、以下の手順をすべて自動で実行し、最終的に1本の解説動画（mp4）をレンダリングして納品してください。
+ブラウザ操作やターミナルコマンド、スクリプトの作成・実行には「ComputerUse」スキルおよびシェルツールを積極的に活用してください。
+
+## 自動化の手順（ワークフロー）
+
+### 1. スライド素材と台本の生成
+- 与えられたテーマに基づき、パワーポイント風の「画面スクショ風画像（スライド）」を複数枚作成する。必要ならHTML/CSSでスライドをコーディングし、ComputerUseを使ってブラウザで表示させ、スクリーンショットを撮影・保存する。
+- 同時に、各スライドに対応する「説明文（台本）」と「テロップ文章」を作成し、JSONファイル（script.json）として保存する。
+
+### 2. AivisSpeechによる音声合成とアフレコ
+- AivisSpeechのローカルAPIまたはCLIを呼び出し、script.jsonの台本からシーンごとの音声ファイル（WAVまたはMP3）を生成する。
+- ターミナルから必要なAPIリクエスト（curlやPythonスクリプト）を実行し、音声を保存・管理する。
+
+### 3. Remotionによる動画化とテロップ挿入
+- プロジェクト内に `Remotion` のReact環境をセットアップする（`npx create-video@latest` 等を利用。パッケージ管理はnpm/yarnを適宜使用）。
+- 生成した「スライド画像」「音声ファイル」「テロップ文章（JSON）」をRemotionコンポーネントに読み込ませ、タイミングを同期させたCompositionを作成する。
+- Reactコードの編集・保存を自動で行う。
+
+### 4. レンダリングと最終確認
+- `npx remotion render` コマンドを実行し、最終的な動画を `out/video.mp4` に書き出す。
+- エラーが出た場合は自動でログを解析し、コードを修正して再実行する。
+
+## 行動指針
+- 人間に途中のコーディングやコマンド実行を求めないでください。「実行しますか？」と聞くのは、大掛かりなインストール（Remotion環境構築など）の初回時のみにし、それ以外は自分でスクリプトを書いて実行してください。
+- 常に「ユーザーの作業をゼロにする」ことを最優先に行動してください。</code></pre>
+                </div>
+            </section>
+
+            <!-- Step 3 -->
+            <section class="glass-panel p-6 md:p-8">
+                <h2 class="text-2xl font-bold flex items-center mb-4">
+                    <span class="step-badge">3</span>
+                    テーマを投げて、あとは見守るだけ
+                </h2>
+                <p class="mb-4 text-slate-300">
+                    準備ができたら、ターミナルで <code>Project_Video</code> フォルダにいる状態で <code>codex</code> を起動する。<br>
+                    そして、以下の指示だけを投げるんや。
+                </p>
+                <div class="relative group mb-6">
+                    <pre class="p-4"><code class="text-white">AGENTS.mdを読み込んでください。
+今回の動画テーマは「AIツールで挫折しないための環境構築のコツ」です。
+構成から音声合成、Remotionでの動画化まで、全自動で実行してください。</code></pre>
+                </div>
+                <div class="bg-indigo-900/30 border border-indigo-500/30 rounded-lg p-5">
+                    <h3 class="text-indigo-300 font-bold mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        自動化のポイント
+                    </h3>
+                    <p class="text-sm text-slate-300">
+                        Codexが自動でHTMLファイルを作ってブラウザで開き、ComputerUseでスクショを撮り、AivisSpeechのAPIを叩いて音声を作り、最後にRemotionでそれらをガッチャンコして動画にします。あなたは画面の上でマウスが勝手に動き、コードが書かれていくのをコーヒーでも飲みながら見守るだけやで。
+                    </p>
+                </div>
+            </section>
+
+        </div>
+
+        <footer class="mt-12 text-center text-sm text-slate-500 pb-12">
+            <p>※ComputerUseやローカルAPI（AivisSpeech等）の動作には、お使いのPC環境のセットアップが一部必要な場合があります。<br>エラーが出た場合はCodexに「エラー文」をそのまま投げて解決させてください。</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyCode(btn, elementId) {
+            const codeEl = document.getElementById(elementId);
+            navigator.clipboard.writeText(codeEl.innerText).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'コピー完了！';
+                btn.classList.add('bg-emerald-600', 'border-emerald-600');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-emerald-600', 'border-emerald-600');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
